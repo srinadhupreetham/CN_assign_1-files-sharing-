@@ -1,0 +1,62 @@
+
+
+           								 ** CN ASSIGNMENT-1 **
+
+						20161043 (S.sai preetham)  20161175 (Nikhil reddy).
+
+20161043_20161175_Assignment1
+  |
+   ---Q1
+  |     |
+  |      ---Server
+  |           |
+  |            ---server.c
+  |            ---files
+  |      ---Client
+  |           |
+  |            ---client.c
+  |
+   ---Q2
+        |
+         ---Server
+              |
+               ---server_persistent.py
+               ---server_nonpersistent.py
+               ---Data
+                   |
+                    ---datfiles
+         ---Client
+              |
+               ---client_persistent.py
+               ---client_nonpersistent.py
+
+           ******-----------------------------------------------------------******
+ 1.1 Basic server and clients using sockets
+   - compile both client.c and server.c from two different terminal
+     -- gcc server.c -o server (in Server directory)
+     -- gcc client.c -o client (in Client directory)
+					(or)
+     -- gcc server.c followed by ./a.out
+     -- gcc client.c followed by ./a.out
+   - first run the server in Server directory by using ./server
+   - now go to client directory from another terminal run the client by using ./client
+   - now give input file name in space provided by client to download the files using socket
+
+ 1.2 Persistent and Non-persistent connections
+   - We have used python for this part
+   - persistent is better than non-persistent connection is the conclusion obtained
+   - install pathlib using pip
+
+ 	Persistent:
+	1. go to server_persistent  file containing directory and run python server_persistent 
+	2. go to client_persistent  file containing directory in another terminal and run python client_persistent <filenames 			seperated by space>
+	3. Here we are transfering multiple files using same socket.
+	4. files will download into client directory
+
+	Non-persistent:
+	1. go to server_nonpersistent  file containing directory and run python server_nonpersistent 
+	2. go to client_nonpersistent  file containing directory in another terminal and run python client_nonpersistent <filenames  seperated by space>
+	3. Here we are transfering multiple files by creating different sockets.
+	4. files will download into client directory
+
+### By using times we got to know that persistent is faster than non persistent

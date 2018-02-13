@@ -4,14 +4,16 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <errno.h>
-#define PORT 8080
+#include <unistd.h>
+#include <arpa/inet.h>
+#define PORT 8081
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
     struct sockaddr_in address;  // sockaddr_in - references elements of the socket address. "in" for internet
     int opt = 1;
     int addrlen = sizeof(address);
-    char buffer[1024] = {0};
+    char buffer[1024] = {0},buffer1[1024] = {0};
     char *hello = "Hello from server here";
     FILE *fp;
 
@@ -29,12 +31,12 @@ int main(int argc, char const *argv[])
         perror("setsockopt");
         exit(EXIT_FAILURE);
     }
-    address.sin_family = AF_INET;  // Address family. For IPv6, it's AF_INET6. 29 others exist like AF_UNIX etc. 
+    address.sin_family = AF_INET;  // Address family. For IPv6, it's AF_INET6. 29 others exist like AF_UNIX etc.
     address.sin_addr.s_addr = INADDR_ANY;  // Accept connections from any IP address - listens from all interfaces.
     address.sin_port = htons( PORT );    // Server port to open. Htons converts to Big Endian - Left to Right. RTL is Little Endian
 
     // Forcefully attaching socket to the port 8080
-    if (bind(server_fd, (struct sockaddr *)&address,
+    if (bind(server_fd, (struct sockaddr *)&address,   //server_fd defines socket descriptor returned by socket()
                                  sizeof(address))<0)
     {
         perror("bind failed");
@@ -48,49 +50,46 @@ int main(int argc, char const *argv[])
         perror("listen");
         exit(EXIT_FAILURE);
     }
-
-while(1)
-{
-    // returns a brand new socket file descriptor to use for this single accepted connection. Once done, use send and recv
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
-                       (socklen_t*)&addrlen))<0)
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address,   // address will hold clients information when accept returns
+                       (socklen_t*)&addrlen))<0)                       //addrlen is pointer to size of client structure
     {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-
-    fp = fopen("test.txt", "r");
+    valread = read(new_socket,buffer1,1024);//read information received into the buffer
+    if (valread < 0)
+        printf("error valread");
+    printf("%s\n",buffer1 );
+while(1)
+{
+    fp = fopen(buffer1, "r");
     if (fp == NULL)
     {
-    	printf("File open error");
+    	printf("File open error\n");
     	return 1;
     }
-	
+
 	while (1)
 	{
-		valread = fread(buffer,1,1024,fp);
+		valread = fread(buffer,1,1024,fp); 
 		if(valread > 0)
 		{
-			printf("sending read data");
-			write(new_socket,buffer,valread);
+			printf("sending read data\n");     
+			write(new_socket,buffer,valread); //process of sending data to client from server
+            printf("sent read data\n");
 		}
-	   
+
 		if(valread < 1024)
 		{
 			if (feof(fp))
-				printf("End of file\n");
+				printf("End of file\n");  
 			if (ferror(fp))
-				printf("error reading\n");
+				printf("error reading\n");  // prints if error in reading occurs
 			break;
 		}
 	}
-	close(new_socket);
-	break;
-//     valread = read( new_socket , buffer, 1024);  // read infromation received into the buffer
-//     printf("%s\n",buffer );
-//     send(new_socket , hello , strlen(hello) , 0 );  // use sendto() and recvfrom() for DGRAM
-//     printf("Hello message sent\n");
-// }
+    break;
 }
+    close(new_socket);
     return 0;
 }
